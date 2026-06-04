@@ -18,36 +18,72 @@ The core problem it solves: when you pay your credit card from your bank account
 ---
 
 ## Getting Started
-
+ 
 ### Prerequisites
-
-- [Node.js](https://nodejs.org) v16 or later
-
-### Installation
-
+ 
+- [Node.js](https://nodejs.org) v18 or later and npm v8 or later
+Verify your versions before starting:
+ 
 ```bash
-# Clone or download the repo
-git clone https://github.com/uttssss/agentic-ai-course-submissions.git
-cd agentic-ai-course-submissions/week1
-
-# Install dependencies
-npm install
-
-# Start the app
-npm start
+node -v   # should be v18 or higher
+npm -v    # should be v8 or higher
 ```
-
-The app opens at `http://localhost:3000`.
-
-### First run
-
-1. Go to **Accounts** and add your accounts (name, type, opening balance, as-of date)
+ 
+If your versions are older (especially npm 3.x which ships with old Anaconda environments), update Node first using [nvm](https://github.com/nvm-sh/nvm):
+ 
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+# restart your terminal, then:
+nvm install --lts
+nvm use --lts
+```
+ 
+### Step 1 — Clone the repo
+ 
+```bash
+git clone https://github.com/uttssss/agentic-ai-course-submissions.git
+```
+ 
+### Step 2 — Scaffold a Vite + React project
+ 
+The app is a single `.jsx` file. Use Vite to create a project to run it in. Run this from wherever you cloned the repo — **not** inside the `week1` folder:
+ 
+```bash
+npm create vite@latest fintrack -- --template react
+cd fintrack
+```
+ 
+### Step 3 — Install dependencies
+ 
+```bash
+npm install
+npm install recharts
+```
+ 
+### Step 4 — Copy the app file in
+ 
+```bash
+cp ../agentic-ai-course-submissions/week1/fintrack-v0.jsx src/App.jsx
+```
+ 
+### Step 5 — Start the dev server
+ 
+```bash
+npm run dev
+```
+ 
+The app opens at `http://localhost:5173`.
+ 
+### Step 6 — First run
+ 
+1. Go to **Accounts** in the sidebar and add your accounts — give each one a name, type (checking, savings, credit card, etc.), and opening balance
 2. Go to **Import CSV** and upload your first bank export
-3. Map the columns (date, description, amount) — the mapping is saved for next time
-4. Review the preview and confirm the import
+3. Select the account it belongs to, then map the columns (date, description, amount) — the mapping is saved for next time
+4. Review the transaction preview and confirm the import
 5. Repeat for each account
-6. Go to **Dashboard** to see your full financial picture
-
+6. Open **Dashboard** to see net worth, income, spending trends, and category breakdown
+> **Demo data:** If you just want to explore the app without your own files, use the sample CSVs in `demo-data/` — see the [Demo Data](#demo-data) section below for setup instructions.
+ 
 ---
 
 ## CSV Import Guide
