@@ -137,7 +137,7 @@ Three sample CSV files are included for testing:
 | `week1/demo-data/demo_credit_card.csv` | Credit card | 206 | Jun 2025 – May 2026 |
 
 **Setup for demo:**
-Loom walkthrough: https://www.loom.com/share/db8df8a769634fe6a77374043357b048
+Loom walkthrough: https://www.loom.com/share/631b1f42c13e492d856a2b397cf7e6f3
 
 Add three accounts before importing:
 
