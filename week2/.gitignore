@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+.venv/
+data/bm25_index.pkl
+.DS_Store
+
+# Note: commit uv.lock (reproducible installs); ignore the venv it builds.

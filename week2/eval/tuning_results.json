@@ -1,0 +1,70 @@
+{
+  "current": {
+    "dense_weight": 0.6,
+    "confidence_threshold": 0.75
+  },
+  "recommended": {
+    "dense_weight": 0.0,
+    "confidence_threshold": 0.45
+  },
+  "dense_weight_sweep": [
+    {
+      "dense_weight": 0.0,
+      "recall": 0.4545,
+      "mrr": 0.7727
+    },
+    {
+      "dense_weight": 0.2,
+      "recall": 0.4545,
+      "mrr": 0.7727
+    },
+    {
+      "dense_weight": 0.3,
+      "recall": 0.4545,
+      "mrr": 0.7727
+    },
+    {
+      "dense_weight": 0.4,
+      "recall": 0.4545,
+      "mrr": 0.7727
+    },
+    {
+      "dense_weight": 0.5,
+      "recall": 0.4545,
+      "mrr": 0.7727
+    },
+    {
+      "dense_weight": 0.6,
+      "recall": 0.4545,
+      "mrr": 0.7727
+    },
+    {
+      "dense_weight": 0.7,
+      "recall": 0.4545,
+      "mrr": 0.7727
+    },
+    {
+      "dense_weight": 0.8,
+      "recall": 0.4545,
+      "mrr": 0.7727
+    },
+    {
+      "dense_weight": 1.0,
+      "recall": 0.4545,
+      "mrr": 0.7727
+    }
+  ],
+  "answerable_top_scores": [
+    0.6952,
+    0.721,
+    0.6658,
+    0.5007,
+    0.5979,
+    0.5563,
+    0.7258,
+    0.7301,
+    0.7306,
+    0.6665,
+    0.5001
+  ]
+}
