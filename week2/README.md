@@ -1,6 +1,6 @@
 # Localized Real Estate Transaction & Contract Copilot
 
-Production-grade RAG copilot that answers a first-time homebuyer's contract-deadline
+RAG copilot that answers a first-time homebuyer's contract-deadline
 and contingency questions, grounded strictly in official state/county/HOA guidelines
 plus the buyer's executed purchase agreement — with a confidence gate that escalates
 low-confidence and out-of-scope queries to a human agent. See the tech spec for full
