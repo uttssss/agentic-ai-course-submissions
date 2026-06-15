@@ -6,6 +6,8 @@ plus the buyer's executed purchase agreement — with a confidence gate that esc
 low-confidence and out-of-scope queries to a human agent. See the tech spec for full
 design.
 
+Loom walkthrough: https://www.loom.com/share/38e4f97428be4576882050a67e6948c9
+
 ## Layout
 
 ```
