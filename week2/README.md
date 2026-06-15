@@ -110,3 +110,7 @@ date calculation, multi-document stitching, edge cases, and refusals.
   during development; real PDFs route through LlamaParse layout mode.
 - Geographic isolation is enforced at the DB layer via Pinecone metadata filters
   and a state allow-list on the BM25 path.
+
+## Resources
+- [week2/eval/tuning_progress.md](https://github.com/uttssss/agentic-ai-course-submissions/blob/main/week2/eval/tuning_progress.md) : Refer for findings during tuning process
+- https://github.com/uttssss/agentic-ai-course-submissions/blob/main/week2/eval/debug_eval_results.md: Refer for exact responses
