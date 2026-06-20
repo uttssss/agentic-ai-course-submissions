@@ -1,11 +1,26 @@
 """Publisher node — commits approved post to GitHub Pages and logs it."""
 from __future__ import annotations
 
+import re
+import unicodedata
 from datetime import datetime
 
 from ...memory.post_log import log_post
 from ...tools.publish_github import publish_post
 from ..state import ContentAgentState
+
+
+def _slugify(text: str) -> str:
+    """Convert any string to a clean ASCII URL slug with only hyphens and alphanumerics."""
+    # Replace all Unicode dash/hyphen variants with a plain ASCII hyphen before normalization
+    # (NFKD drops them rather than converting them)
+    text = re.sub(r"[‐-―−‑]", "-", text)
+    text = unicodedata.normalize("NFKD", text)
+    text = text.encode("ascii", "ignore").decode("ascii")
+    text = text.lower()
+    # Collapse any run of non-alphanumeric characters to a single hyphen
+    text = re.sub(r"[^a-z0-9]+", "-", text)
+    return text.strip("-")
 
 
 def publisher(state: ContentAgentState) -> dict:
@@ -23,7 +38,7 @@ def publisher(state: ContentAgentState) -> dict:
     target = substack_drafts[0] if substack_drafts else approved[0]
 
     concept = themes[0].get("concept", "post") if themes else "post"
-    safe_slug = concept.lower().replace(" ", "-").replace("/", "-")[:50]
+    safe_slug = _slugify(concept)[:50]
     date_prefix = datetime.utcnow().strftime("%Y-%m-%d")
 
     from ...config.settings import settings

@@ -3,7 +3,7 @@ name = "build-in-public-content-agent"
 version = "0.1.0"
 description = "Build-in-Public Content Agent — agentic pipeline (LangChain + LangGraph) that turns weekly course materials and project work into approved LinkedIn and blog posts."
 readme = "README.md"
-requires-python = ">=3.10,<3.13"  # torch ships no wheels for 3.13/3.14 yet; use 3.12
+requires-python = ">=3.10,<3.13"
 authors = [{ name = "Utthra" }]
 
 dependencies = [
@@ -13,21 +13,16 @@ dependencies = [
     # Models / providers (Nebius is OpenAI-compatible)
     "openai>=1.30",
     # Vector + sparse retrieval
-    "pinecone-client>=4.0",
+    "pinecone-client>=3.0,<6.0",
     "rank-bm25>=0.2.2",
-    # Reranker (pulls in torch transitively)
-    "sentence-transformers>=2.7",
-    # torch dropped Intel-macOS (x86_64) wheels after 2.2.2 — pin it there only,
-    # so resolution succeeds on Intel Macs. Other platforms resolve torch freely.
-    "torch==2.2.2; sys_platform == 'darwin' and platform_machine == 'x86_64'",
     # PDF parsing
     "llama-parse>=0.4",
-    # Eval
-    "ragas>=0.1",
-    "datasets>=2.19",
     # Frontend
     "streamlit>=1.35",
-    # HTTP client for GitHub API (content agent)
+    # Pin uvicorn below 0.30 — Streamlit's shutdown handler expects Server.servers
+    # which was removed in uvicorn 0.30.0, causing an AttributeError on Ctrl+C.
+    "uvicorn<0.30",
+    # HTTP client for GitHub API
     "requests>=2.31",
 ]
 
@@ -42,8 +37,5 @@ python_files = ["test_*.py"]
 python_functions = ["test_*"]
 addopts = "-ra"
 
-# Non-package project: uv manages the dependency venv but does not try to build
-# the project itself (the importable `copilot` package is reached via PYTHONPATH
-# from the parent dir, e.g. `python -m copilot.ingest.batch_base_corpus`).
 [tool.uv]
 package = false

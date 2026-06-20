@@ -1,9 +1,11 @@
 """Streamlit UI for the Build-in-Public Content Agent (Week 3).
 
-Run with:  streamlit run copilot/app/content_agent_app.py
+Run with:  make run-agent
 """
 from __future__ import annotations
 
+import re
+import traceback
 import uuid
 
 import streamlit as st
@@ -20,12 +22,13 @@ st.caption("Turn a week's course materials + project into publish-ready LinkedIn
 # ── Session bootstrap ────────────────────────────────────────────────────────
 if "thread_id" not in st.session_state:
     st.session_state.thread_id = uuid.uuid4().hex
-    st.session_state.phase = "input"      # input → running → review → done
+    st.session_state.phase = "input"
     st.session_state.checkpointer = MemorySaver()
     st.session_state.app = None
     st.session_state.pending_state: dict = {}
     st.session_state.published_url: str | None = None
     st.session_state.error_log: list[str] = []
+    st.session_state.last_error: str = ""
 
 
 def _get_app():
@@ -38,14 +41,31 @@ def _config() -> dict:
     return {"configurable": {"thread_id": st.session_state.thread_id}}
 
 
-# ── Phase 1: Inputs ──────────────────────────────────────────────────────────
+def _parse_repo(value: str) -> str:
+    """Accept 'owner/repo' or any GitHub URL and return just 'owner/repo'."""
+    value = value.strip()
+    # Match https://github.com/owner/repo (ignore trailing path)
+    m = re.search(r"github\.com/([^/]+/[^/\s]+)", value)
+    if m:
+        return m.group(1).rstrip("/")
+    return value
+
+
+# ── Phase: Input ─────────────────────────────────────────────────────────────
 if st.session_state.phase == "input":
+    if st.session_state.last_error:
+        st.error(st.session_state.last_error)
+        st.session_state.last_error = ""
+
     with st.form("inputs"):
         st.subheader("Week inputs")
         col1, col2 = st.columns(2)
         with col1:
             week = st.number_input("Week number", min_value=1, max_value=52, value=3, step=1)
-            github_repo = st.text_input("GitHub project repo (owner/repo)", placeholder="yourname/my-week3-project")
+            github_repo = st.text_input(
+                "GitHub project repo (owner/repo or full URL)",
+                placeholder="yourname/my-week3-project",
+            )
         with col2:
             materials_files = st.file_uploader(
                 "Course materials (PDF / Markdown)", type=["pdf", "md", "txt"],
@@ -59,7 +79,6 @@ if st.session_state.phase == "input":
         submitted = st.form_submit_button("Run content agent →", type="primary")
 
     if submitted:
-        # Save uploaded files to /tmp
         def _save_uploads(uploads) -> list[str]:
             paths = []
             for f in (uploads or []):
@@ -73,7 +92,7 @@ if st.session_state.phase == "input":
             "week": int(week),
             "materials_paths": _save_uploads(materials_files),
             "notes_paths": _save_uploads(notes_files),
-            "github_repo": github_repo.strip(),
+            "github_repo": _parse_repo(github_repo),
             "critic_revision_count": 0,
             "error_log": [],
         }
@@ -82,29 +101,33 @@ if st.session_state.phase == "input":
         st.session_state.initial_state = initial_state
         st.rerun()
 
-# ── Phase: Running ───────────────────────────────────────────────────────────
+# ── Phase: Running ────────────────────────────────────────────────────────────
 elif st.session_state.phase == "running":
-    with st.spinner("Agent running: ingesting → planning → retrieving → drafting → critiquing…"):
+    st.info("Agent running: ingesting → planning → retrieving → drafting → critiquing…  \nThis takes 2–5 minutes. Do not close this tab.")
+    with st.spinner("Working…"):
         try:
             app = _get_app()
             app.invoke(st.session_state.initial_state, config=_config())
             graph_state = app.get_state(_config())
 
             if graph_state.next:
-                # Graph is interrupted at human_gate — surface drafts for review
                 st.session_state.pending_state = graph_state.values
                 st.session_state.phase = "review"
             else:
-                # Completed without interrupt (edge case)
                 st.session_state.published_url = graph_state.values.get("published_url")
                 st.session_state.error_log = graph_state.values.get("error_log", [])
                 st.session_state.phase = "done"
         except Exception as exc:
-            st.error(f"Agent error: {exc}")
+            st.session_state.last_error = (
+                f"Agent error: {exc}\n\n```\n{traceback.format_exc()}\n```"
+            )
             st.session_state.phase = "input"
+            # Reset graph so next run starts fresh
+            st.session_state.app = None
+            st.session_state.thread_id = uuid.uuid4().hex
     st.rerun()
 
-# ── Phase: Human review gate ─────────────────────────────────────────────────
+# ── Phase: Human review gate ──────────────────────────────────────────────────
 elif st.session_state.phase == "review":
     pending = st.session_state.pending_state
     drafts: list[Draft] = pending.get("drafts", [])
@@ -117,6 +140,9 @@ elif st.session_state.phase == "review":
         with st.expander(f"Theme {i}: {t.get('concept', '')}"):
             st.write(f"**My angle:** {t.get('note_angle', '')}")
             st.write(f"**Build evidence:** {t.get('build_evidence', '')}")
+
+    if not drafts:
+        st.warning("No drafts were generated. Check agent warnings below.")
 
     st.subheader("Draft posts (review before publishing)")
     if revision_count > 0:
@@ -131,7 +157,7 @@ elif st.session_state.phase == "review":
 
         with st.expander(f"{'LinkedIn' if platform == 'linkedin' else 'Substack / Blog'} draft", expanded=True):
             st.markdown(f"**Critic score:** :{score_color}[{score:.1f} / 5]")
-            if feedback and feedback.lower() != "approved":
+            if feedback and feedback.lower() not in ("approved", ""):
                 st.caption(f"Critic note: {feedback}")
             edited_contents[platform] = st.text_area(
                 "Edit draft (optional):", value=draft.get("content", ""),
@@ -154,10 +180,7 @@ elif st.session_state.phase == "review":
                 for d in drafts
             ]
             st.session_state.phase = "publishing"
-            st.session_state.resume_payload = {
-                "decision": "approve",
-                "edited_drafts": approved_drafts,
-            }
+            st.session_state.resume_payload = {"decision": "approve", "edited_drafts": approved_drafts}
             st.rerun()
 
     with col2:
@@ -168,19 +191,14 @@ elif st.session_state.phase == "review":
 
     with col3:
         if st.button("❌ Reject / start over"):
-            # Reset session
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
             st.rerun()
 
-# ── Phase: Publishing (resume after interrupt) ────────────────────────────────
+# ── Phase: Publishing ─────────────────────────────────────────────────────────
 elif st.session_state.phase == "publishing":
     payload = st.session_state.get("resume_payload", {"decision": "reject"})
-
-    if payload["decision"] == "regenerate":
-        spinner_msg = "Regenerating drafts…"
-    else:
-        spinner_msg = "Publishing approved post to GitHub Pages…"
+    spinner_msg = "Regenerating drafts…" if payload["decision"] == "regenerate" else "Publishing to GitHub Pages…"
 
     with st.spinner(spinner_msg):
         try:
@@ -189,7 +207,6 @@ elif st.session_state.phase == "publishing":
             graph_state = app.get_state(_config())
 
             if graph_state.next:
-                # Interrupted again (regeneration loop came back to human_gate)
                 st.session_state.pending_state = graph_state.values
                 st.session_state.phase = "review"
             else:
@@ -197,7 +214,7 @@ elif st.session_state.phase == "publishing":
                 st.session_state.error_log = graph_state.values.get("error_log", [])
                 st.session_state.phase = "done"
         except Exception as exc:
-            st.error(f"Resume error: {exc}")
+            st.session_state.last_error = f"Publish error: {exc}\n\n```\n{traceback.format_exc()}\n```"
             st.session_state.phase = "review"
     st.rerun()
 
@@ -207,9 +224,9 @@ elif st.session_state.phase == "done":
     url = st.session_state.published_url
     if url:
         st.markdown(f"**Published:** [{url}]({url})")
-        st.info("LinkedIn draft is in the approved drafts above — copy and post manually.")
+        st.info("LinkedIn draft: copy from the drafts above and post manually.")
     else:
-        st.warning("No URL returned. Check GitHub Pages configuration or agent warnings.")
+        st.warning("No URL returned — check agent warnings below.")
 
     for e in st.session_state.error_log:
         st.warning(e)
