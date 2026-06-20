@@ -1,0 +1,26 @@
+# Orchestration
+langchain>=0.2
+langgraph>=0.2
+
+# Models / providers (Nebius is OpenAI-compatible)
+openai>=1.30
+
+# Vector + sparse retrieval
+pinecone>=4.0
+rank-bm25>=0.2.2
+
+# Reranker (pulls in torch transitively)
+sentence-transformers>=2.7
+# torch dropped Intel-macOS (x86_64) wheels after 2.2.2. This pin ONLY applies on
+# Intel Macs / Rosetta; on native Apple Silicon (arm64) torch resolves freely.
+torch==2.2.2; sys_platform == 'darwin' and platform_machine == 'x86_64'
+
+# PDF parsing
+llama-parse>=0.4
+
+# Eval
+ragas>=0.1
+datasets>=2.19
+
+# Frontend
+streamlit>=1.35
