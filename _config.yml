@@ -1,0 +1,6 @@
+title: "Building in Public — Mastering Agentic AI"
+description: "Weekly posts pairing what I learned with what I shipped."
+baseurl: "/agentic-ai-course-submissions"
+url: "https://uttssss.github.io"
+theme: minima
+permalink: /:year/:month/:day/:title/
