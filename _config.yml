@@ -4,3 +4,8 @@ baseurl: "/agentic-ai-course-submissions"
 url: "https://uttssss.github.io"
 theme: minima
 permalink: /:year/:month/:day/:title/
+exclude:
+  - README.md
+  - week1/
+  - week2/
+  - week3/
