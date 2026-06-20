@@ -19,13 +19,13 @@ LangGraph StateGraph (ContentAgentState)
       ├─► ingest ──────────────────────────► Pinecone (3 namespaces)
       │         └── LlamaParse / GitHub API
       │
-      ├─► planner ─────────────────────────► Nebius LLM + post_log memory
+      ├─► planner ─────────────────────────► openai/gpt-oss-120b via Nebius + post_log memory
       │
       ├─► retriever ───────────────────────► Pinecone dense + BM25 sparse
       │
-      ├─► generator ───────────────────────► Nebius LLM (LinkedIn + Substack)
+      ├─► generator ───────────────────────► openai/gpt-oss-120b via Nebius (LinkedIn + Substack)
       │
-      ├─► critic ──────────────────────────► Nebius LLM (score 0–5)
+      ├─► critic ──────────────────────────► openai/gpt-oss-120b via Nebius (score 0–5)
       │      └── (fail) ──► bump_revision ──► generator  (max 2 retries)
       │
       ├─► human_gate ──────────────────────► interrupt() — Streamlit review UI
@@ -194,8 +194,8 @@ The same Pinecone index is reused for semantic memory (future: vector search ove
 
 | Key | Default | Purpose |
 |---|---|---|
-| `embedding_model` | `Qwen/Qwen3-Embedding-8B` | Embeddings via Nebius |
-| `generation_model` | `openai/gpt-oss-120b` | Generation + critic via Nebius |
+| `embedding_model` | `Qwen/Qwen3-Embedding-8B` | Alibaba Qwen3 embedding model hosted on Nebius (4096-dim) |
+| `generation_model` | `openai/gpt-oss-120b` | 120B open-source model hosted on Nebius Token Factory; used for planner, generator, and critic |
 | `pinecone_index` | `realestate-copilot` | Shared Pinecone index (separate namespaces) |
 | `embedding_dim` | 4096 | Vector dimension |
 | `chunk_size_tokens` | 512 | Max tokens per chunk |
