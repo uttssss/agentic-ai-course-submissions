@@ -1,7 +1,7 @@
 [project]
-name = "realestate-contract-copilot"
+name = "build-in-public-content-agent"
 version = "0.1.0"
-description = "Localized Real Estate Transaction & Contract Copilot — a production-grade RAG engine (LangChain + LangGraph)."
+description = "Build-in-Public Content Agent — agentic pipeline (LangChain + LangGraph) that turns weekly course materials and project work into approved LinkedIn and blog posts."
 readme = "README.md"
 requires-python = ">=3.10,<3.13"  # torch ships no wheels for 3.13/3.14 yet; use 3.12
 authors = [{ name = "Utthra" }]
